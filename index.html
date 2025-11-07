@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mon Webnovel & Wiki</title>
+  <meta name="description" content="Lecture webnovel et wiki hiérarchique." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Crimson+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="wrap topbar">
+    <a class="logo" href="./index.html">📚 <b>Webnovel</b> · Wiki</a>
+    <nav class="tabs">
+      <a class="tab active" href="./index.html">Accueil</a>
+      <a class="tab" href="./wiki/index.html">Wiki</a>
+    </nav>
+  </header>
+
+  <main class="wrap grid-2">
+    <!-- LISTE DES CHAPITRES -->
+    <section class="card">
+      <header class="section-head">
+        <h1>Chapitres</h1>
+        <p class="muted">Clique un élément pour ouvrir la page du chapitre.</p>
+      </header>
+      <ol class="chapter-list">
+        <li>
+          <a class="row" href="./chapters/chapter-01.html">
+            <span class="idx">01</span>
+            <span class="title">Le Réveil</span>
+            <span class="meta">Arc I · ~1800 mots</span>
+          </a>
+        </li>
+        <li>
+          <a class="row" href="./chapters/chapter-02.html">
+            <span class="idx">02</span>
+            <span class="title">Les Cendres</span>
+            <span class="meta">Arc I · ~2100 mots</span>
+          </a>
+        </li>
+        <li>
+          <a class="row disabled" href="#">
+            <span class="idx">03</span>
+            <span class="title">Le Pacte</span>
+            <span class="meta">Bientôt</span>
+          </a>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ACCÈS AU WIKI -->
+    <aside class="card">
+      <header class="section-head">
+        <h2>Wiki — Catégories</h2>
+        <p class="muted">Parcours par sous-pages : catégories → fiches détaillées.</p>
+      </header>
+      <nav class="links">
+        <a class="pill" href="./wiki/index.html">🏷️ Wiki — Accueil</a>
+        <a class="pill" href="./wiki/factions/index.html">🛡️ Factions</a>
+        <a class="pill" href="./wiki/personnages/index.html">🧭 Personnages</a>
+      </nav>
+      <div class="card-soft">
+        <b>Astuce</b>
+        <p>Chaque catégorie a sa <em>liste</em> (ex. Factions), et chaque entrée a sa <em>sous-page</em> (ex. Garde Umbrale).</p>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>© Ton Nom — Webnovel & Wiki multi-pages.</p>
+  </footer>
+</body>
+</html>
