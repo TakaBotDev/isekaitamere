@@ -93,8 +93,10 @@ function openChapter(id) {
     `Chapitre ${chapter.number} — ${chapter.title}`;
 
   const normalizedContent = String(chapter.content || "")
-    .replaceAll("\\n", "\n")
-    .replaceAll("\\r", "");
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
 
   const html = normalizedContent
     .split(/\n\s*\n/)
