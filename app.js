@@ -92,7 +92,11 @@ function openChapter(id) {
   document.getElementById("chapter-subtitle").textContent =
     `Chapitre ${chapter.number} — ${chapter.title}`;
 
-  const html = String(chapter.content || "")
+  const normalizedContent = String(chapter.content || "")
+    .replaceAll("\\n", "\n")
+    .replaceAll("\\r", "");
+
+  const html = normalizedContent
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
