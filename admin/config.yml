@@ -2,7 +2,7 @@ backend:
   name: github
   repo: TakaBotDev/isekaitamere
   branch: main
-  base_url: https://bounoverse-auth.takabotdev.workers.dev
+  base_url: https://isekaitamere.7francoiskhien.workers.dev/
   auth_endpoint: auth
   use_graphql: true
 
