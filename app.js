@@ -1,5 +1,4 @@
 let siteData = null;
-let currentView = "home";
 
 async function loadSiteData() {
   if (siteData) return siteData;
@@ -28,7 +27,6 @@ function escapeHtml(text) {
 }
 
 function showView(viewName) {
-  currentView = viewName;
   document.querySelectorAll(".view").forEach((section) => {
     section.classList.toggle("hidden", section.id !== `${viewName}-view`);
   });
@@ -55,8 +53,7 @@ function renderHome(data) {
   document.getElementById("story-title").textContent = data.storyTitle || "Mon histoire";
   document.getElementById("story-subtitle").textContent =
     data.storySubtitle || "Une histoire publiée chapitre par chapitre.";
-  document.getElementById("story-intro").textContent =
-    data.intro || "";
+  document.getElementById("story-intro").textContent = data.intro || "";
 
   const list = document.getElementById("chapters-list");
   const count = document.getElementById("chapters-count");
@@ -132,7 +129,7 @@ async function init() {
     openChapterFromUrl();
   } catch (error) {
     renderError(
-      "Le site n’a pas réussi à charger chapters.json. Sur GitHub Pages, ça fonctionnera normalement. En local, lance de préférence un petit serveur."
+      "Le site n’a pas réussi à charger chapters.json. Sur GitHub Pages, ça fonctionnera normalement. En local, utilise de préférence un petit serveur."
     );
     console.error(error);
   }
