@@ -7,7 +7,14 @@
       "id": 1,
       "number": 1,
       "title": "Le bannissement",
-      "content": "Le ciel était encore gris lorsque les portes du palais s'ouvrirent dans un grondement sourd. Elyra descendit les marches sans se retourner. Derrière elle, personne n'osa prononcer son nom.\\n\\nLe décret de bannissement avait été lu à l'aube, devant une cour silencieuse. Les visages restaient figés, mais elle sentait dans chaque regard le poids d'une vérité que tous préféraient ignorer.\\n\\nOn l'accusait d'avoir réveillé une ancienne menace. D'avoir troublé l'ordre du royaume. Pourtant, au fond d'elle, Elyra savait qu'on l'éloignait pour une tout autre raison : elle avait vu ce qu'elle n'aurait jamais dû voir.\\n\\nAu moment où elle franchit la dernière arche, une rafale de vent souleva sa cape. Là-bas, au-dessus des tours, les cendres tournaient déjà dans le ciel comme une promesse obscure.\\n\\nElle comprit alors que son exil n'était pas une fin. C'était le commencement."
+      "publishedAt": "2025-04-14",
+      "content": [
+        "Le ciel était encore gris lorsque les portes du palais s'ouvrirent dans un grondement sourd. Elyra descendit les marches sans se retourner. Derrière elle, personne n'osa prononcer son nom.",
+        "Le décret de bannissement avait été lu à l'aube, devant une cour silencieuse. Les visages restaient figés, mais elle sentait dans chaque regard le poids d'une vérité que tous préféraient ignorer.",
+        "On l'accusait d'avoir réveillé une ancienne menace. D'avoir troublé l'ordre du royaume. Pourtant, au fond d'elle, Elyra savait qu'on l'éloignait pour une tout autre raison : elle avait vu ce qu'elle n'aurait jamais dû voir.",
+        "Au moment où elle franchit la dernière arche, une rafale de vent souleva sa cape. Là-bas, au-dessus des tours, les cendres tournaient déjà dans le ciel comme une promesse obscure.",
+        "Elle comprit alors que son exil n'était pas une fin. C'était le commencement."
+      ]
     }
   ]
 }
