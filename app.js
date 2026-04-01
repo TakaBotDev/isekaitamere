@@ -145,9 +145,9 @@ function openChapter(id) {
   document.getElementById("chapter-subtitle").textContent =
     `Chapitre ${chapter.number} — ${chapter.title}`;
 
-const html = getParagraphs(chapter)
-  .map((paragraph) => `<p>${formatInlineText(paragraph)}</p>`)
-  .join("");
+  const html = getParagraphs(chapter)
+    .map((paragraph) => `<p>${formatInlineText(paragraph)}</p>`)
+    .join("");
 
   document.getElementById("chapter-content").innerHTML =
     html || "<p>Ce chapitre est vide.</p>";
@@ -190,3 +190,4 @@ async function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
