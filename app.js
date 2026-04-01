@@ -8,7 +8,7 @@ async function loadSiteData() {
   baseUrl.hash = "";
 
   const jsonUrl = new URL("./chapters.json", baseUrl);
-  jsonUrl.searchParams.set("v", "3");
+  jsonUrl.searchParams.set("v", "5");
 
   const response = await fetch(jsonUrl.toString(), { cache: "no-store" });
   if (!response.ok) {
@@ -56,10 +56,22 @@ function goHomeAndScrollToChapters() {
   }, 30);
 }
 
+function formatPublicationDate(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return dateString;
+
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  }).format(date);
+}
+
 function renderHome(data) {
   document.getElementById("story-title").textContent = data.storyTitle || "Mon histoire";
   document.getElementById("story-subtitle").textContent =
-    data.storySubtitle || "";
+    data.storySubtitle || "Une histoire publiée chapitre par chapitre.";
   document.getElementById("story-intro").textContent = data.intro || "";
 
   const list = document.getElementById("chapters-list");
@@ -69,20 +81,41 @@ function renderHome(data) {
   count.textContent = `${sorted.length} chapitre${sorted.length > 1 ? "s" : ""} disponible${sorted.length > 1 ? "s" : ""}.`;
 
   list.innerHTML = sorted
-    .map((chapter) => `
-      <article
-        class="novel-card chapter-card-interactive"
-        role="button"
-        tabindex="0"
-        onclick="openChapter(${chapter.id})"
-        onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter(${chapter.id}); }"
-      >
-        <div class="novel-content">
-          <h3>Chapitre ${chapter.number} — ${escapeHtml(chapter.title)}</h3>
-        </div>
-      </article>
-    `)
+    .map((chapter) => {
+      const formattedDate = formatPublicationDate(chapter.publishedAt);
+      return `
+        <article
+          class="novel-card chapter-card-interactive"
+          role="button"
+          tabindex="0"
+          onclick="openChapter(${chapter.id})"
+          onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter(${chapter.id}); }"
+        >
+          <div class="novel-content chapter-row">
+            <h3>Chapitre ${chapter.number} — ${escapeHtml(chapter.title)}</h3>
+            <span class="chapter-date">${escapeHtml(formattedDate)}</span>
+          </div>
+        </article>
+      `;
+    })
     .join("");
+}
+
+function getParagraphs(chapter) {
+  if (Array.isArray(chapter.content)) {
+    return chapter.content
+      .map((paragraph) => String(paragraph).trim())
+      .filter(Boolean);
+  }
+
+  const normalizedContent = String(chapter.content || "")
+    .replaceAll("\\n", "\n")
+    .replaceAll("\\r", "");
+
+  return normalizedContent
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
 }
 
 function openChapter(id) {
@@ -96,14 +129,7 @@ function openChapter(id) {
   document.getElementById("chapter-subtitle").textContent =
     `Chapitre ${chapter.number} — ${chapter.title}`;
 
-  const normalizedContent = String(chapter.content || "")
-    .replaceAll("\\n", "\n")
-    .replaceAll("\\r", "");
-
-  const html = normalizedContent
-    .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean)
+  const html = getParagraphs(chapter)
     .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
     .join("");
 
