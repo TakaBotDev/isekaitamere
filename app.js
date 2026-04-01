@@ -72,8 +72,16 @@ function renderHome(data) {
   document.getElementById("story-title").textContent = data.storyTitle || "Mon histoire";
   document.getElementById("story-subtitle").textContent =
     data.storySubtitle || "";
-  document.getElementById("story-intro").textContent = data.intro || "";
+  const introElement = document.getElementById("story-intro");
+const introParagraphs = Array.isArray(data.intro)
+  ? data.intro
+  : [String(data.intro || "")];
 
+introElement.innerHTML = introParagraphs
+  .map((paragraph) => String(paragraph).trim())
+  .filter(Boolean)
+  .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+  .join("");
   const list = document.getElementById("chapters-list");
   const count = document.getElementById("chapters-count");
   const sorted = [...data.chapters].sort((a, b) => Number(a.number) - Number(b.number));
