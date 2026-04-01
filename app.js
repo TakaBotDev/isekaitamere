@@ -88,7 +88,7 @@ const introParagraphs = Array.isArray(data.intro)
 introElement.innerHTML = introParagraphs
   .map((paragraph) => String(paragraph).trim())
   .filter(Boolean)
-  .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+  .map((paragraph) => `<p>${formatInlineText(paragraph)}</p>`)
   .join("");
   const list = document.getElementById("chapters-list");
   const count = document.getElementById("chapters-count");
