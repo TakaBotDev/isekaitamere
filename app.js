@@ -59,7 +59,7 @@ function goHomeAndScrollToChapters() {
 function renderHome(data) {
   document.getElementById("story-title").textContent = data.storyTitle || "Mon histoire";
   document.getElementById("story-subtitle").textContent =
-    data.storySubtitle || "Une histoire publiée chapitre par chapitre.";
+    data.storySubtitle || "";
   document.getElementById("story-intro").textContent = data.intro || "";
 
   const list = document.getElementById("chapters-list");
