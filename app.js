@@ -33,6 +33,14 @@ function escapeHtml(text) {
     .replaceAll("'", "&#039;");
 }
 
+function formatInlineText(text) {
+  const escaped = escapeHtml(text);
+
+  return escaped
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>");
+}
+
 function showView(viewName) {
   document.querySelectorAll(".view").forEach((section) => {
     section.classList.toggle("hidden", section.id !== `${viewName}-view`);
