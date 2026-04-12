@@ -273,7 +273,11 @@ header {
   margin-bottom: 18px;
   font-size: 1.05rem;
   line-height: 1.9;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Times New Roman", Times, serif;
+}
+
+#story-intro p {
+  font-family: "Times New Roman", Times, serif;
 }
 
 .error-message {
