@@ -8,7 +8,7 @@ async function loadSiteData() {
   baseUrl.hash = "";
 
   const jsonUrl = new URL("./chapters.json", baseUrl);
-  jsonUrl.searchParams.set("v", "10");
+  jsonUrl.searchParams.set("v", "11");
 
   const response = await fetch(jsonUrl.toString(), { cache: "no-store" });
   if (!response.ok) {
@@ -126,39 +126,71 @@ function renderHome(data) {
     .join("");
 }
 
-function getContentBlocks(chapter) {
+function normalizeLegacyStringContent(text) {
+  return String(text || "")
+    .replaceAll("\\n", "\n")
+    .replaceAll("\\r", "")
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((paragraph) => ({
+      type: "text",
+      text: paragraph
+    }));
+}
+
+function normalizeContentArray(content) {
+  return content
+    .map((item) => {
+      if (typeof item === "string") {
+        return {
+          type: "text",
+          text: item
+        };
+      }
+
+      if (item && typeof item === "object") {
+        return item;
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+}
+
+async function getContentBlocks(chapter) {
   if (Array.isArray(chapter.content)) {
-    return chapter.content
-      .map((item) => {
-        if (typeof item === "string") {
-          return {
-            type: "text",
-            text: item
-          };
-        }
-
-        if (item && typeof item === "object") {
-          return item;
-        }
-
-        return null;
-      })
-      .filter(Boolean);
+    return normalizeContentArray(chapter.content);
   }
 
   if (typeof chapter.content === "string") {
-    const normalizedContent = chapter.content
-      .replaceAll("\\n", "\n")
-      .replaceAll("\\r", "");
+    return normalizeLegacyStringContent(chapter.content);
+  }
 
-    return normalizedContent
-      .split(/\n\s*\n/)
-      .map((paragraph) => paragraph.trim())
-      .filter(Boolean)
-      .map((paragraph) => ({
-        type: "text",
-        text: paragraph
-      }));
+  if (chapter.file) {
+    const baseUrl = new URL(window.location.href);
+    baseUrl.search = "";
+    baseUrl.hash = "";
+
+    const fileUrl = new URL(chapter.file, baseUrl);
+    fileUrl.searchParams.set("v", "11");
+
+    const response = await fetch(fileUrl.toString(), { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Impossible de charger ${chapter.file} (${response.status})`);
+    }
+
+    const fileData = await response.json();
+
+    if (Array.isArray(fileData.content)) {
+      return normalizeContentArray(fileData.content);
+    }
+
+    if (typeof fileData.content === "string") {
+      return normalizeLegacyStringContent(fileData.content);
+    }
+
+    return [];
   }
 
   return [];
@@ -226,7 +258,7 @@ function renderContentBlock(block) {
   return "";
 }
 
-function openChapter(id) {
+async function openChapter(id) {
   if (!siteData) return;
 
   const chapter = siteData.chapters.find((item) => String(item.id) === String(id));
@@ -237,12 +269,20 @@ function openChapter(id) {
   document.getElementById("chapter-subtitle").textContent =
     `${getChapterLabel(chapter)} — ${chapter.title}`;
 
-  const html = getContentBlocks(chapter)
-    .map((block) => renderContentBlock(block))
-    .join("");
+  try {
+    const blocks = await getContentBlocks(chapter);
 
-  document.getElementById("chapter-content").innerHTML =
-    html || "<p>Ce chapitre est vide.</p>";
+    const html = blocks
+      .map((block) => renderContentBlock(block))
+      .join("");
+
+    document.getElementById("chapter-content").innerHTML =
+      html || "<p>Ce chapitre est vide.</p>";
+  } catch (error) {
+    document.getElementById("chapter-content").innerHTML =
+      `<p>Impossible de charger ce chapitre. ${escapeHtml(error.message)}</p>`;
+    console.error(error);
+  }
 
   showView("chapter");
 
