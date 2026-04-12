@@ -14,14 +14,20 @@
     "Comme si ce n’était pas suffisant, une énorme boule de pierre s’écrasa exactement dans où se trouvait mon “corps” ou du moins ce qu’il en restait pour encore plus le détruire. Mes membres quittèrent le reste de mon corps et se firent propulsés dans des directions différentes.",
     "Oui, c’est ainsi que débuta mon aventure dans un nouveau monde."
   ],
-  "chapters": [
+  "arcs": [
     {
-      "id": 9999,
-      "number": 0,
-      "label": "Prologue",
-      "title": "Acteur et Spectatrice/Scénariste",
-      "publishedAt": "2025-04-01",
-      "file": "chapters/prologue.json"
+      "id": "arc1",
+      "title": "Arc 1 - Début",
+      "chapters": [
+        {
+          "id": 9999,
+          "number": 0,
+          "label": "Prologue",
+          "title": "Acteur et Spectatrice/Scénariste",
+          "publishedAt": "2025-04-01",
+          "file": "chapters/prologue.json"
+        }
+      ]
     }
   ]
 }
