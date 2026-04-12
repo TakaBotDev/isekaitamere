@@ -217,13 +217,14 @@ header {
 }
 
 .arc-block + .arc-block {
-  margin-top: 28px;
+  margin-top: 40px;
 }
 
 .arc-title {
-  margin-bottom: 14px;
-  font-size: 1.2rem;
-  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
   color: var(--text);
 }
 
