@@ -328,6 +328,29 @@ header {
   font-style: italic;
 }
 
+.spoiler-image-block {
+  text-align: center;
+}
+
+.spoiler-image-button {
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: 0.2s ease;
+}
+
+.spoiler-image-button:hover {
+  background: rgba(230, 244, 255, 0.95);
+  border-color: rgba(0, 113, 227, 0.22);
+  color: #0071e3;
+}
+
 .site-footer {
   margin-top: 48px;
   padding: 24px 0 36px;
