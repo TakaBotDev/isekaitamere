@@ -29,6 +29,30 @@
         }
       ]
     }
+    {
+      "id": "arc1-1",
+      "title": "Arc 1 (Part 1) — L'académie",
+      "chapters": [
+      ]
+    }
+    {
+      "id": "arc1-2",
+      "title": "Arc 1 (Part 2) — Le Labyrinthe",
+      "chapters": [
+      ]
+    }
+    {
+      "id": "arc2",
+      "title": "Arc 2 — L'Ultime Combat",
+      "chapters": [
+      ]
+    }
+    {
+      "id": "arc3",
+      "title": "Arc 3 (Arc Final) — Fin."
+      "chapters": [
+      ]
+    }
   ]
 }
 
