@@ -28,7 +28,7 @@
           "file": "chapters/prologue.json"
         }
       ]
-    }
+    },
     {
       "id": "arc1-1",
       "title": "Arc 1 (Part 1) — L'académie",
@@ -42,7 +42,7 @@
           "file": "chapters/prologue.json"
         }
       ]
-    }
+    },
     {
       "id": "arc1-2",
       "title": "Arc 1 (Part 2) — Le Labyrinthe",
@@ -56,7 +56,7 @@
           "file": "chapters/prologue.json"
         }
       ]
-    }
+    },
     {
       "id": "arc2",
       "title": "Arc 2 — L'Ultime Combat",
@@ -70,7 +70,7 @@
           "file": "chapters/prologue.json"
         }
       ]
-    }
+    },
     {
       "id": "arc3",
       "title": "Arc 3 (Arc Final) — Fin."
