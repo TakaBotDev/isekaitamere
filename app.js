@@ -8,7 +8,7 @@ async function loadSiteData() {
   baseUrl.hash = "";
 
   const jsonUrl = new URL("./chapters.json", baseUrl);
-  jsonUrl.searchParams.set("v", "11");
+  jsonUrl.searchParams.set("v", "12");
 
   const response = await fetch(jsonUrl.toString(), { cache: "no-store" });
   if (!response.ok) {
@@ -16,7 +16,10 @@ async function loadSiteData() {
   }
 
   const data = await response.json();
-  if (!data || !Array.isArray(data.chapters)) {
+  if (
+    !data ||
+    (!Array.isArray(data.chapters) && !Array.isArray(data.arcs))
+  ) {
     throw new Error("Le fichier chapters.json est invalide.");
   }
 
@@ -81,6 +84,25 @@ function getChapterLabel(chapter) {
   return `Chapitre ${chapter.number}`;
 }
 
+function getAllChapters(data) {
+  if (Array.isArray(data.chapters)) {
+    return [...data.chapters];
+  }
+
+  if (Array.isArray(data.arcs)) {
+    return data.arcs.flatMap((arc) =>
+      Array.isArray(arc.chapters)
+        ? arc.chapters.map((chapter) => ({
+            ...chapter,
+            arcTitle: arc.title
+          }))
+        : []
+    );
+  }
+
+  return [];
+}
+
 function renderHome(data) {
   document.getElementById("story-title").textContent = data.storyTitle || "Mon histoire";
   document.getElementById("story-subtitle").textContent = data.storySubtitle || "";
@@ -98,32 +120,72 @@ function renderHome(data) {
 
   const list = document.getElementById("chapters-list");
   const count = document.getElementById("chapters-count");
-  const sorted = [...data.chapters].sort((a, b) => Number(a.number) - Number(b.number));
 
-  count.textContent = `${sorted.length} chapitre${sorted.length > 1 ? "s" : ""} disponible${sorted.length > 1 ? "s" : ""}.`;
+  const allChapters = getAllChapters(data).sort((a, b) => Number(a.number) - Number(b.number));
+  count.textContent = `${allChapters.length} chapitre${allChapters.length > 1 ? "s" : ""} disponible${allChapters.length > 1 ? "s" : ""}.`;
 
-  list.innerHTML = sorted
-    .map((chapter) => {
-      const formattedDate = formatPublicationDate(chapter.publishedAt);
-      const label = getChapterLabel(chapter);
-      const safeId = String(chapter.id).replaceAll("'", "\\'");
+  if (Array.isArray(data.arcs)) {
+    list.innerHTML = data.arcs
+      .map((arc) => {
+        const chapters = [...(arc.chapters || [])].sort((a, b) => Number(a.number) - Number(b.number));
 
-      return `
-        <article
-          class="novel-card chapter-card-interactive"
-          role="button"
-          tabindex="0"
-          onclick="openChapter('${safeId}')"
-          onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter('${safeId}'); }"
-        >
-          <div class="novel-content chapter-row">
-            <h3>${escapeHtml(label)} — ${escapeHtml(chapter.title)}</h3>
-            <span class="chapter-date">${escapeHtml(formattedDate)}</span>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
+        return `
+          <section class="arc-block">
+            <h3 class="arc-title">${escapeHtml(arc.title)}</h3>
+            <div class="arc-chapters">
+              ${chapters
+                .map((chapter) => {
+                  const formattedDate = formatPublicationDate(chapter.publishedAt);
+                  const label = getChapterLabel(chapter);
+                  const safeId = String(chapter.id).replaceAll("'", "\\'");
+
+                  return `
+                    <article
+                      class="novel-card chapter-card-interactive"
+                      role="button"
+                      tabindex="0"
+                      onclick="openChapter('${safeId}')"
+                      onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter('${safeId}'); }"
+                    >
+                      <div class="novel-content chapter-row">
+                        <h3>${escapeHtml(label)} — ${escapeHtml(chapter.title)}</h3>
+                        <span class="chapter-date">${escapeHtml(formattedDate)}</span>
+                      </div>
+                    </article>
+                  `;
+                })
+                .join("")}
+            </div>
+          </section>
+        `;
+      })
+      .join("");
+  } else {
+    const sorted = [...data.chapters].sort((a, b) => Number(a.number) - Number(b.number));
+
+    list.innerHTML = sorted
+      .map((chapter) => {
+        const formattedDate = formatPublicationDate(chapter.publishedAt);
+        const label = getChapterLabel(chapter);
+        const safeId = String(chapter.id).replaceAll("'", "\\'");
+
+        return `
+          <article
+            class="novel-card chapter-card-interactive"
+            role="button"
+            tabindex="0"
+            onclick="openChapter('${safeId}')"
+            onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter('${safeId}'); }"
+          >
+            <div class="novel-content chapter-row">
+              <h3>${escapeHtml(label)} — ${escapeHtml(chapter.title)}</h3>
+              <span class="chapter-date">${escapeHtml(formattedDate)}</span>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+  }
 }
 
 function normalizeLegacyStringContent(text) {
@@ -173,7 +235,7 @@ async function getContentBlocks(chapter) {
     baseUrl.hash = "";
 
     const fileUrl = new URL(chapter.file, baseUrl);
-    fileUrl.searchParams.set("v", "11");
+    fileUrl.searchParams.set("v", "12");
 
     const response = await fetch(fileUrl.toString(), { cache: "no-store" });
     if (!response.ok) {
@@ -261,7 +323,7 @@ function renderContentBlock(block) {
 async function openChapter(id) {
   if (!siteData) return;
 
-  const chapter = siteData.chapters.find((item) => String(item.id) === String(id));
+  const chapter = getAllChapters(siteData).find((item) => String(item.id) === String(id));
   if (!chapter) return;
 
   document.getElementById("chapter-story-title").textContent =
