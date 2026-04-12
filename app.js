@@ -8,7 +8,7 @@ async function loadSiteData() {
   baseUrl.hash = "";
 
   const jsonUrl = new URL("./chapters.json", baseUrl);
-  jsonUrl.searchParams.set("v", "5");
+  jsonUrl.searchParams.set("v", "7");
 
   const response = await fetch(jsonUrl.toString(), { cache: "no-store" });
   if (!response.ok) {
@@ -78,18 +78,19 @@ function formatPublicationDate(dateString) {
 
 function renderHome(data) {
   document.getElementById("story-title").textContent = data.storyTitle || "Mon histoire";
-  document.getElementById("story-subtitle").textContent =
-    data.storySubtitle || "";
-  const introElement = document.getElementById("story-intro");
-const introParagraphs = Array.isArray(data.intro)
-  ? data.intro
-  : [String(data.intro || "")];
+  document.getElementById("story-subtitle").textContent = data.storySubtitle || "";
 
-introElement.innerHTML = introParagraphs
-  .map((paragraph) => String(paragraph).trim())
-  .filter(Boolean)
-  .map((paragraph) => `<p>${formatInlineText(paragraph)}</p>`)
-  .join("");
+  const introElement = document.getElementById("story-intro");
+  const introParagraphs = Array.isArray(data.intro)
+    ? data.intro
+    : [String(data.intro || "")];
+
+  introElement.innerHTML = introParagraphs
+    .map((paragraph) => String(paragraph).trim())
+    .filter(Boolean)
+    .map((paragraph) => `<p>${formatInlineText(paragraph)}</p>`)
+    .join("");
+
   const list = document.getElementById("chapters-list");
   const count = document.getElementById("chapters-count");
   const sorted = [...data.chapters].sort((a, b) => Number(a.number) - Number(b.number));
@@ -99,16 +100,18 @@ introElement.innerHTML = introParagraphs
   list.innerHTML = sorted
     .map((chapter) => {
       const formattedDate = formatPublicationDate(chapter.publishedAt);
+      const label = chapter.label || `Chapitre ${chapter.number}`;
+
       return `
         <article
           class="novel-card chapter-card-interactive"
           role="button"
           tabindex="0"
-          onclick="openChapter(${chapter.id})"
-          onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter(${chapter.id}); }"
+          onclick="openChapter('${chapter.id}')"
+          onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter('${chapter.id}'); }"
         >
           <div class="novel-content chapter-row">
-            <h3>Chapitre ${chapter.number} — ${escapeHtml(chapter.title)}</h3>
+            <h3>${escapeHtml(label)} — ${escapeHtml(chapter.title)}</h3>
             <span class="chapter-date">${escapeHtml(formattedDate)}</span>
           </div>
         </article>
@@ -117,44 +120,79 @@ introElement.innerHTML = introParagraphs
     .join("");
 }
 
-function getParagraphs(chapter) {
+async function loadChapterContent(chapter) {
   if (Array.isArray(chapter.content)) {
-    return chapter.content
-      .map((paragraph) => String(paragraph).trim())
+    return chapter.content.map((paragraph) => String(paragraph).trim()).filter(Boolean);
+  }
+
+  if (typeof chapter.content === "string") {
+    return String(chapter.content)
+      .replaceAll("\\n", "\n")
+      .replaceAll("\\r", "")
+      .split(/\n\s*\n/)
+      .map((paragraph) => paragraph.trim())
       .filter(Boolean);
   }
 
-  const normalizedContent = String(chapter.content || "")
-    .replaceAll("\\n", "\n")
-    .replaceAll("\\r", "");
+  if (chapter.file) {
+    const fileUrl = new URL(chapter.file, window.location.href);
+    fileUrl.searchParams.set("v", "7");
 
-  return normalizedContent
-    .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
+    const response = await fetch(fileUrl.toString(), { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Impossible de charger ${chapter.file} (${response.status})`);
+    }
+
+    const data = await response.json();
+
+    if (Array.isArray(data.content)) {
+      return data.content.map((paragraph) => String(paragraph).trim()).filter(Boolean);
+    }
+
+    if (typeof data.content === "string") {
+      return String(data.content)
+        .replaceAll("\\n", "\n")
+        .replaceAll("\\r", "")
+        .split(/\n\s*\n/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
 }
 
-function openChapter(id) {
+async function openChapter(id) {
   if (!siteData) return;
 
-  const chapter = siteData.chapters.find((item) => Number(item.id) === Number(id));
+  const chapter = siteData.chapters.find((item) => String(item.id) === String(id));
   if (!chapter) return;
+
+  const label = chapter.label || `Chapitre ${chapter.number}`;
 
   document.getElementById("chapter-story-title").textContent =
     siteData.storyTitle || "Mon histoire";
   document.getElementById("chapter-subtitle").textContent =
-    `Chapitre ${chapter.number} — ${chapter.title}`;
+    `${label} — ${chapter.title}`;
 
-  const html = getParagraphs(chapter)
-    .map((paragraph) => `<p>${formatInlineText(paragraph)}</p>`)
-    .join("");
+  try {
+    const paragraphs = await loadChapterContent(chapter);
 
-  document.getElementById("chapter-content").innerHTML =
-    html || "<p>Ce chapitre est vide.</p>";
+    const html = paragraphs
+      .map((paragraph) => `<p>${formatInlineText(paragraph)}</p>`)
+      .join("");
+
+    document.getElementById("chapter-content").innerHTML =
+      html || "<p>Ce chapitre est vide.</p>";
+  } catch (error) {
+    document.getElementById("chapter-content").innerHTML =
+      `<p>Impossible de charger ce chapitre. ${escapeHtml(error.message)}</p>`;
+    console.error(error);
+  }
 
   showView("chapter");
   const url = new URL(window.location.href);
-  url.search = `?chapter=${chapter.id}`;
+  url.search = `?chapter=${encodeURIComponent(chapter.id)}`;
   url.hash = "";
   history.replaceState({}, "", url.toString());
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -190,4 +228,3 @@ async function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
