@@ -8,7 +8,7 @@ async function loadSiteData() {
   baseUrl.hash = "";
 
   const jsonUrl = new URL("./chapters.json", baseUrl);
-  jsonUrl.searchParams.set("v", "7");
+  jsonUrl.searchParams.set("v", "9");
 
   const response = await fetch(jsonUrl.toString(), { cache: "no-store" });
   if (!response.ok) {
@@ -76,6 +76,11 @@ function formatPublicationDate(dateString) {
   }).format(date);
 }
 
+function getChapterLabel(chapter) {
+  if (chapter.label) return chapter.label;
+  return `Chapitre ${chapter.number}`;
+}
+
 function renderHome(data) {
   document.getElementById("story-title").textContent = data.storyTitle || "Mon histoire";
   document.getElementById("story-subtitle").textContent = data.storySubtitle || "";
@@ -100,15 +105,15 @@ function renderHome(data) {
   list.innerHTML = sorted
     .map((chapter) => {
       const formattedDate = formatPublicationDate(chapter.publishedAt);
-      const label = chapter.label || `Chapitre ${chapter.number}`;
+      const label = getChapterLabel(chapter);
 
       return `
         <article
           class="novel-card chapter-card-interactive"
           role="button"
           tabindex="0"
-          onclick="openChapter('${chapter.id}')"
-          onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter('${chapter.id}'); }"
+          onclick="openChapter('${String(chapter.id).replaceAll("'", "\\'")}')"
+          onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter('${String(chapter.id).replaceAll("'", "\\'")}'); }"
         >
           <div class="novel-content chapter-row">
             <h3>${escapeHtml(label)} — ${escapeHtml(chapter.title)}</h3>
@@ -120,117 +125,94 @@ function renderHome(data) {
     .join("");
 }
 
-async function loadChapterContent(chapter) {
+function getContentBlocks(chapter) {
   if (Array.isArray(chapter.content)) {
-    return chapter.content.map((paragraph) => String(paragraph).trim()).filter(Boolean);
-  }
+    return chapter.content
+      .map((item) => {
+        if (typeof item === "string") {
+          return {
+            type: "text",
+            text: item
+          };
+        }
 
-  if (typeof chapter.content === "string") {
-    return String(chapter.content)
-      .replaceAll("\\n", "\n")
-      .replaceAll("\\r", "")
-      .split(/\n\s*\n/)
-      .map((paragraph) => paragraph.trim())
+        if (item && typeof item === "object") {
+          return item;
+        }
+
+        return null;
+      })
       .filter(Boolean);
   }
 
-  if (chapter.file) {
-    const fileUrl = new URL(chapter.file, window.location.href);
-    fileUrl.searchParams.set("v", "7");
+  if (typeof chapter.content === "string") {
+    const normalizedContent = chapter.content
+      .replaceAll("\\n", "\n")
+      .replaceAll("\\r", "");
 
-    const response = await fetch(fileUrl.toString(), { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error(`Impossible de charger ${chapter.file} (${response.status})`);
-    }
-
-    const data = await response.json();
-
-    if (Array.isArray(data.content)) {
-      return data.content.map((paragraph) => String(paragraph).trim()).filter(Boolean);
-    }
-
-    if (typeof data.content === "string") {
-      return String(data.content)
-        .replaceAll("\\n", "\n")
-        .replaceAll("\\r", "")
-        .split(/\n\s*\n/)
-        .map((paragraph) => paragraph.trim())
-        .filter(Boolean);
-    }
+    return normalizedContent
+      .split(/\n\s*\n/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean)
+      .map((paragraph) => ({
+        type: "text",
+        text: paragraph
+      }));
   }
 
   return [];
 }
 
-function getContentBlocks(chapter) {
-  if (!Array.isArray(chapter.content)) return [];
+function renderContentBlock(block) {
+  if (!block || typeof block !== "object") return "";
 
-  return chapter.content
-    .map((item) => {
-      if (typeof item === "string") {
-        return {
-          type: "paragraph",
-          text: item
-        };
-      }
+  if (block.type === "image") {
+    const src = escapeHtml(block.src || "");
+    const alt = escapeHtml(block.alt || "");
+    const caption = block.caption
+      ? `<figcaption class="chapter-image-caption">${formatInlineText(block.caption)}</figcaption>`
+      : "";
 
-      return item;
-    })
-    .filter(Boolean);
+    return `
+      <figure class="chapter-image-block">
+        <img src="${src}" alt="${alt}" class="chapter-image" />
+        ${caption}
+      </figure>
+    `;
+  }
+
+  if (block.type === "text" || block.type === "texte" || block.type === "paragraph") {
+    return `<p>${formatInlineText(block.text || "")}</p>`;
+  }
+
+  return "";
 }
 
-async function openChapter(id) {
+function openChapter(id) {
   if (!siteData) return;
 
   const chapter = siteData.chapters.find((item) => String(item.id) === String(id));
   if (!chapter) return;
 
-  const label = chapter.label || `Chapitre ${chapter.number}`;
-
   document.getElementById("chapter-story-title").textContent =
     siteData.storyTitle || "Mon histoire";
   document.getElementById("chapter-subtitle").textContent =
-    `${label} — ${chapter.title}`;
+    `${getChapterLabel(chapter)} — ${chapter.title}`;
 
-  try {
-    const paragraphs = await loadChapterContent(chapter);
+  const html = getContentBlocks(chapter)
+    .map((block) => renderContentBlock(block))
+    .join("");
 
-    const html = getContentBlocks(chapter)
-      .map((block) => {
-        if (block.type === "image") {
-          return `
-            <figure class="chapter-image-block">
-              <img
-                src="${escapeHtml(block.src || "")}"
-                alt="${escapeHtml(block.alt || "")}"
-                class="chapter-image"
-              />
-              ${
-                block.caption
-                  ? `<figcaption class="chapter-image-caption">${formatInlineText(block.caption)}</figcaption>`
-                  : ""
-              }
-            </figure>
-          `;
-        }
-
-    return `<p>${formatInlineText(block.text || "")}</p>`;
-  })
-  .join("");
-
-    document.getElementById("chapter-content").innerHTML =
-      html || "<p>Ce chapitre est vide.</p>";
-  } catch (error) {
-    document.getElementById("chapter-content").innerHTML =
-      `<p>Impossible de charger ce chapitre. ${escapeHtml(error.message)}</p>`;
-    console.error(error);
-  }
+  document.getElementById("chapter-content").innerHTML =
+    html || "<p>Ce chapitre est vide.</p>";
 
   showView("chapter");
+
   const url = new URL(window.location.href);
   url.search = `?chapter=${encodeURIComponent(chapter.id)}`;
   url.hash = "";
   history.replaceState({}, "", url.toString());
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
