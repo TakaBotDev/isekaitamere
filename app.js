@@ -8,7 +8,7 @@ async function loadSiteData() {
   baseUrl.hash = "";
 
   const jsonUrl = new URL("./chapters.json", baseUrl);
-  jsonUrl.searchParams.set("v", "9");
+  jsonUrl.searchParams.set("v", "10");
 
   const response = await fetch(jsonUrl.toString(), { cache: "no-store" });
   if (!response.ok) {
@@ -106,14 +106,15 @@ function renderHome(data) {
     .map((chapter) => {
       const formattedDate = formatPublicationDate(chapter.publishedAt);
       const label = getChapterLabel(chapter);
+      const safeId = String(chapter.id).replaceAll("'", "\\'");
 
       return `
         <article
           class="novel-card chapter-card-interactive"
           role="button"
           tabindex="0"
-          onclick="openChapter('${String(chapter.id).replaceAll("'", "\\'")}')"
-          onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter('${String(chapter.id).replaceAll("'", "\\'")}'); }"
+          onclick="openChapter('${safeId}')"
+          onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openChapter('${safeId}'); }"
         >
           <div class="novel-content chapter-row">
             <h3>${escapeHtml(label)} — ${escapeHtml(chapter.title)}</h3>
@@ -163,6 +164,17 @@ function getContentBlocks(chapter) {
   return [];
 }
 
+function revealSpoilerImage(button) {
+  const container = button.closest("[data-spoiler-image]");
+  if (!container) return;
+
+  const content = container.querySelector(".spoiler-image-content");
+  if (!content) return;
+
+  content.classList.remove("hidden");
+  button.remove();
+}
+
 function renderContentBlock(block) {
   if (!block || typeof block !== "object") return "";
 
@@ -177,6 +189,32 @@ function renderContentBlock(block) {
       <figure class="chapter-image-block">
         <img src="${src}" alt="${alt}" class="chapter-image" />
         ${caption}
+      </figure>
+    `;
+  }
+
+  if (block.type === "spoiler-image") {
+    const src = escapeHtml(block.src || "");
+    const alt = escapeHtml(block.alt || "");
+    const buttonText = escapeHtml(block.buttonText || "Afficher l'image");
+    const caption = block.caption
+      ? `<figcaption class="chapter-image-caption">${formatInlineText(block.caption)}</figcaption>`
+      : "";
+
+    return `
+      <figure class="chapter-image-block spoiler-image-block" data-spoiler-image>
+        <button
+          type="button"
+          class="spoiler-image-button"
+          onclick="revealSpoilerImage(this)"
+        >
+          ${buttonText}
+        </button>
+
+        <div class="spoiler-image-content hidden">
+          <img src="${src}" alt="${alt}" class="chapter-image" />
+          ${caption}
+        </div>
       </figure>
     `;
   }
