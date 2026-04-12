@@ -33,24 +33,56 @@
       "id": "arc1-1",
       "title": "Arc 1 (Part 1) — L'académie",
       "chapters": [
+        {
+          "id": 9999,
+          "number": 0,
+          "label": "Prologue",
+          "title": "Acteur et Spectatrice/Scénariste",
+          "publishedAt": "2025-04-01",
+          "file": "chapters/prologue.json"
+        }
       ]
     }
     {
       "id": "arc1-2",
       "title": "Arc 1 (Part 2) — Le Labyrinthe",
       "chapters": [
+        {
+          "id": 9999,
+          "number": 0,
+          "label": "Prologue",
+          "title": "Acteur et Spectatrice/Scénariste",
+          "publishedAt": "2025-04-01",
+          "file": "chapters/prologue.json"
+        }
       ]
     }
     {
       "id": "arc2",
       "title": "Arc 2 — L'Ultime Combat",
       "chapters": [
+        {
+          "id": 9999,
+          "number": 0,
+          "label": "Prologue",
+          "title": "Acteur et Spectatrice/Scénariste",
+          "publishedAt": "2025-04-01",
+          "file": "chapters/prologue.json"
+        }
       ]
     }
     {
       "id": "arc3",
       "title": "Arc 3 (Arc Final) — Fin."
       "chapters": [
+        {
+          "id": 9999,
+          "number": 0,
+          "label": "Prologue",
+          "title": "Acteur et Spectatrice/Scénariste",
+          "publishedAt": "2025-04-01",
+          "file": "chapters/prologue.json"
+        }
       ]
     }
   ]
