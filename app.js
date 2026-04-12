@@ -162,6 +162,23 @@ async function loadChapterContent(chapter) {
   return [];
 }
 
+function getContentBlocks(chapter) {
+  if (!Array.isArray(chapter.content)) return [];
+
+  return chapter.content
+    .map((item) => {
+      if (typeof item === "string") {
+        return {
+          type: "paragraph",
+          text: item
+        };
+      }
+
+      return item;
+    })
+    .filter(Boolean);
+}
+
 async function openChapter(id) {
   if (!siteData) return;
 
@@ -178,9 +195,28 @@ async function openChapter(id) {
   try {
     const paragraphs = await loadChapterContent(chapter);
 
-    const html = paragraphs
-      .map((paragraph) => `<p>${formatInlineText(paragraph)}</p>`)
-      .join("");
+    const html = getContentBlocks(chapter)
+      .map((block) => {
+        if (block.type === "image") {
+          return `
+            <figure class="chapter-image-block">
+              <img
+                src="${escapeHtml(block.src || "")}"
+                alt="${escapeHtml(block.alt || "")}"
+                class="chapter-image"
+              />
+              ${
+                block.caption
+                  ? `<figcaption class="chapter-image-caption">${formatInlineText(block.caption)}</figcaption>`
+                  : ""
+              }
+            </figure>
+          `;
+        }
+
+    return `<p>${formatInlineText(block.text || "")}</p>`;
+  })
+  .join("");
 
     document.getElementById("chapter-content").innerHTML =
       html || "<p>Ce chapitre est vide.</p>";
