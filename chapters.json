@@ -48,14 +48,20 @@
       ]
     },
     {
-      "id": "arc3-1",
-      "title": "Arc 3 (Alternative 1) — Alone in the universe",
+      "id": "arc3",
+      "title": "Arc 3 — Fin ?",
       "chapters": [
       ]
     },
-        {
-      "id": "arc3-2",
-      "title": "Arc 3 (Alternative 2) — Together in the universe",
+    {
+      "id": "epi1",
+      "title": "Epilogue (Alternative 1) — Alone in the universe",
+      "chapters": [
+      ]
+    }
+    {
+      "id": "epi2",
+      "title": "Epilogue (Alternative 2) — Together in the universe",
       "chapters": [
       ]
     }
